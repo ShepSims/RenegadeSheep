@@ -13,34 +13,23 @@
 			gtag('config', 'G-5YNPJJ5JZX');
 		</script>
 		<meta charset="UTF-8" />
-		<link rel="icon" href="./coinPos1.jpg" />
-		<title>BTF | ETF</title>
+		<link rel="icon" href="./sheep.png" />
+		<title>Sheep Estate</title>
 		<link rel="stylesheet" href="styles.css" />
 	</head>
 
 	<body>
 		<canvas id="gameCanvas" width="screen.width" height="screen.height"></canvas>
-		<img id="coinPos1" width="0" height="0" src="./coinPos1.jpg" alt="coinPos1" />
-		<img id="coinPos2" width="0" height="0" src="./coinPos2.jpg" alt="coinPos2" />
-		<img id="coinPos3" width="0" height="0" src="./coinPos3.jpg" alt="coinPos3" />
-		<img id="coinPos4" width="0" height="0" src="./coinPos4.jpg" alt="coinPos4" />
-		<img id="coinPos5" width="0" height="0" src="./coinPos5.jpg" alt="coinPos5" />
-		<img id="coinPos6" width="0" height="0" src="./coinPos6.jpg" alt="coinPos6" />
-		<img id="coinPos7" width="0" height="0" src="./coinPos7.jpg" alt="coinPos7" />
-		<img id="coinPos8" width="0" height="0" src="./coinPos8.jpg" alt="coinPos8" />
-		<img id="coinPos9" width="0" height="0" src="./coinPos9.jpg" alt="coinPos9" />
-		<img id="powerPos1" width="0" height="0" src="./powerPos1.png" alt="powerPos1" />
-		<img id="powerPos2" width="0" height="0" src="./powerPos2.png" alt="powerPos2" />
-		<img id="powerPos3" width="0" height="0" src="./powerPos3.png" alt="powerPos3" />
-		<img id="powerPos4" width="0" height="0" src="./powerPos4.png" alt="powerPos4" />
-		<img id="powerPos5" width="0" height="0" src="./powerPos5.png" alt="powerPos5" />
-		<img id="powerPos6" width="0" height="0" src="./powerPos6.png" alt="powerPos6" />
-		<img id="powerPos7" width="0" height="0" src="./powerPos7.png" alt="powerPos7" />
-		<img id="powerPos8" width="0" height="0" src="./powerPos8.png" alt="powerPos8" />
-		<img id="powerPos9" width="0" height="0" src="./powerPos9.png" alt="powerPos9" />
-		<img id="sheep" width="0" height="0" src="./sheep.png" alt="sheep" />
+		<img id="egg-white" width="0" height="0" src="./egg-white.png" alt="egg-white" />
+		<img id="blacksheep" width="0" height="0" src="./blacksheep.png" alt="blacksheep" />
 		<img id="bullWithLazers" width="0" height="0" src="./bullWithLazers.PNG" alt="bullWithLazers" />
-		<img id="bear" width="0" height="0" src="./bear.png" alt="bear" />
+		<img id="sheep" width="0" height="0" src="./sheep.png" alt="sheep" />
+		<img id="sheepHalfWool" width="0" height="0" src="./sheepHalfWool.png" alt="sheepHalfWool" />
+		<img id="sheepNoWool" width="0" height="0" src="./sheepNoWool.png" alt="sheepNoWool" />
+		<img id="spindle" width="0" height="0" src="./spindle.png" alt="spindle" />
+
+		<img id="sheep" width="0" height="0" src="./sheep.png" alt="sheep" />
+
 		<img id="projectile" width="0" height="0" src="./projectile.png" alt="projectile" />
 		<img
 			id="greenticker"
@@ -49,43 +38,64 @@
 			src="https://www.pngfind.com/pngs/m/50-503249_arrows-clip-art-download-green-up-arrow-transparent.png"
 			alt="greenticker"
 		/>
+		<!-- <script type="text/javascript" src="functions.js"></script> -->
 
 		<script>
+			function isInside(pos, rect) {
+				return pos.x > rect.x && pos.x < rect.x + rect.width && pos.y < rect.y + rect.height && pos.y > rect.y;
+			}
+			function getMousePos(canvas, event) {
+				var rect = canvas.getBoundingClientRect();
+				return {
+					x: event.clientX - rect.left,
+					y: event.clientY - rect.top,
+				};
+			}
+
 			const FPS = 30; // frames per second
 			const FRICTION = 0.7; // friction coefficient of space (0 = none, 1 = lots)
-			const BULL_SIZE = 30; // in pixels
+			const SHEEPSIZE = 30; // in pixels
 			const TURN_SPEED = 360; // turn speed in degrees per second
 			const LASER_SPD = 30;
 			let CURRENT_BITCOIN_VALUE;
-			let SCORE = 0;
+			let GOLD = 0;
+			let WOOL = 0;
+			let DEMAND = 0;
 			let HIGH_SCORE = 0;
 			let HIGH_VALUE = 0;
 			let TIME = 0;
-			let choice = 'coinPos1';
+			let choice = 'egg-white';
 			let powerPos = 'powerPos1';
 			let menu = false;
 			let value = 0;
-			let valueString;
 			let bounce = false;
 			let ppx = 0;
 			let ppy = 0;
 			let double = false;
 			let fork = false;
-			let bearspeed = 3;
-			getPrice();
-			//
+			let sheepSpeed = 3;
 
 			// get canvas properties
 			var canvas = document.getElementById('gameCanvas');
 			var context = canvas.getContext('2d');
+			const rect = {
+				x: canvas.width / 4 + 5,
+				y: canvas.height / 4 + 5,
+				width: canvas.width / 1.5 - 10,
+				height: canvas.height / 2 - 10,
+			};
+
 			context.canvas.width = window.innerWidth - 50;
 			context.canvas.height = window.innerHeight - 50;
-			coinPos = { x: Math.floor(Math.random() * (context.canvas.width - 25)), y: Math.floor(Math.random() * (context.canvas.height - 25)) };
+			egg = {
+				x: Math.floor(Math.random() * (context.canvas.width - 25)),
+				y: Math.floor(Math.random() * (context.canvas.height - 25)),
+			};
 
-			var bull = {
+			var player = {
 				x: canvas.width / 2,
 				y: canvas.height / 2,
-				r: BULL_SIZE / 2,
+				r: SHEEPSIZE / 2,
 				moveUp: false,
 				moveDown: false,
 				moveLeft: false,
@@ -105,94 +115,102 @@
 				},
 			};
 
-			var bears = [
-				{
-					x: coinPos.x - 25,
-					y: coinPos.y - 25,
-					r: BULL_SIZE / 2,
+			function createSheep() {
+				flock.push({
+					x: egg.x - 25,
+					y: egg.y - 25,
+					r: SHEEPSIZE / 2,
 					moveUp: false,
 					moveDown: false,
 					moveLeft: true,
 					moveRight: false,
-					ammo: 0,
-					level: 0,
-					lasers: [],
-				},
-			];
+					woolSize: 0,
+					sheer: function () {
+						if (this.woolSize > 100) {
+							WOOL += Math.floor(this.woolSize / 25) * 25;
+						} else if (this.woolSize > 75) {
+							WOOL += this.woolSize;
+						} else if (this.woolSize > 25) {
+							WOOL += 10;
+						}
+						this.woolSize = 0;
+					},
+					grow: function () {
+						if (this.woolSize < 500) {
+							this.woolSize++;
+						}
+					},
+				});
+			}
+
+			var flock = [];
 
 			var enemyProjectiles = [];
 
 			// event handlers
 			document.addEventListener('keydown', keyDown);
 			document.addEventListener('keyup', keyUp);
+			canvas.addEventListener(
+				'click',
+				function (evt) {
+					var mousePos = getMousePos(canvas, evt);
+					console.log('mousePos: ', mousePos, rect);
+
+					if (menu && isInside(mousePos, rect)) {
+						alert('clicked inside rect');
+					}
+				},
+				false
+			);
 
 			// update loop
-			setInterval(update, 1000 / FPS);
+			setInterval(() => {
+				if (menu) {
+					context.fillStyle = 'white';
+					context.fillRect(0, 0, canvas.width, canvas.height);
+					context.fillRect(100, 100, 100, 100);
+					context.fillStyle = 'black';
+					context.font = '20px san-serif';
+					context.fillText('Avoid the flock and collect BTC', 20, 245);
+					context.fillText('Move: Arrow Keys', 20, 275);
+					context.fillText('Spin: Spacebar', 20, 325);
+					context.fillText('Want to contribute? ', 20, 400);
+					context.fillText('Dm @shep.io on instagram or email shepsims@gmail.com', 20, 430);
+					context.fillStyle = 'black';
+					context.fillRect(canvas.width / 4, canvas.height / 4, canvas.width / 1.5, canvas.height / 2);
+					context.fillStyle = 'white';
 
-			function getPrice() {
-				var xmlhttp = new XMLHttpRequest();
-				var url = 'https://api.coindesk.com/v1/bpi/currentprice.json';
-
-				xmlhttp.onreadystatechange = function () {
-					if (this.readyState == 4 && this.status == 200) {
-						var json = JSON.parse(this.responseText);
-						parseJson(json);
-					}
-				};
-				xmlhttp.open('GET', url, true);
-				xmlhttp.send();
-
-				function parseJson(json) {
-					var usdVal = json['bpi']['USD']['rate'];
-
-					CURRENT_BITCOIN_VALUE = usdVal;
+					context.fillRect(rect.x, rect.y, rect.width, rect.height);
+				} else {
+					update();
 				}
+			}, 1000 / FPS);
+
+			// setInterval(() => increaseScore(1), 1000 / FPS);
+
+			function increaseScore(score) {
+				GOLD += score;
 			}
 
 			function keyDown(/** @type {KeyboardEvent} */ ev) {
 				switch (ev.keyCode) {
-					case 32: // spacebard (bull charge)
-						bull.charge = true;
+					case 32: // spacebar (player spin)
+						player.spin = true;
 						break;
-					case 37: // left arrow (move bull left)
-						bull.moveLeft = true;
+					case 37: // left arrow (move player left)
+						player.moveLeft = true;
 						break;
-					case 38: // up arrow (move bull down)
-						bull.moveDown = true;
+					case 38: // up arrow (move player down)
+						player.moveDown = true;
 						break;
-					case 39: // right arrow (move bull right)
-						bull.moveRight = true;
+					case 39: // right arrow (move player right)
+						player.moveRight = true;
 						break;
-					case 40: // up arrow (move bull up)
-						bull.moveUp = true;
+					case 40: // up arrow (move player up)
+						player.moveUp = true;
 						break;
-					case 65: // a
-						a = { x: -1, y: 0 };
-						if (bull.shotClock < 1) {
-							fire(a);
-						}
-
-						break;
-					case 87: // w
-						a = { x: 0, y: 1 };
-						if (bull.shotClock < 1) {
-							fire(a);
-						}
-						break;
-					case 83: // s
-						a = { x: 0, y: -1 };
-						if (bull.shotClock < 1) {
-							fire(a);
-						}
-						break;
-					case 68: // d
-						a = { x: 1, y: 0 };
-						if (bull.shotClock < 1) {
-							fire(a);
-						}
-						break;
-					case 72: // h
-						menu = true;
+					case 77: // m
+						menu = !menu;
 						break;
 					case 8:
 						window.location.href = 'https://shep.blog';
@@ -201,188 +219,60 @@
 
 			function keyUp(/** @type {KeyboardEvent} */ ev) {
 				switch (ev.keyCode) {
-					case 32: // space (stop bull charge)
-						bull.charge = false;
+					case 32: // space (stop player spin)
+						player.spin = false;
 						break;
-					case 37: // left arrow (stop bull left)
-						bull.moveLeft = false;
+					case 37: // left arrow (stop player left)
+						player.moveLeft = false;
 						break;
-					case 38: // up arrow (stop bull up)
+					case 38: // up arrow (stop player up)
 						// ship.thrusting = false;
-						bull.moveDown = false;
+						player.moveDown = false;
 						break;
-					case 39: // right arrow (stop bull right)
+					case 39: // right arrow (stop player right)
 						// ship.rotation = 0;
-						bull.moveRight = false;
+						player.moveRight = false;
 						break;
-					case 40: // down arrow (stop bull down)
-						bull.moveUp = false;
+					case 40: // down arrow (stop player down)
+						player.moveUp = false;
 						break;
-					case 72:
-						menu = false;
-						break;
+					// case 72:
+					// 	menu = false;
+					// 	break;
 				}
-			}
-
-			function fire(a) {
-				if (bull.ammo > 0) {
-					bull.ammo--;
-					bull.shotClock = 15;
-					// create the laser object
-					if (fork) {
-						bull.lasers.push({
-							x: bull.x + 50,
-							y: bull.y - 50,
-							xv: LASER_SPD * a.x,
-							yv: -LASER_SPD * a.y,
-							life: bounce ? 150 : 25,
-						});
-						bull.lasers.push({
-							x: bull.x - 50,
-							y: bull.y + 50,
-							xv: LASER_SPD * a.x,
-							yv: -LASER_SPD * a.y,
-							life: bounce ? 150 : 25,
-						});
-					} else {
-						bull.lasers.push({
-							x: bull.x,
-							y: bull.y,
-							xv: LASER_SPD * a.x,
-							yv: -LASER_SPD * a.y,
-							life: bounce ? 150 : 25,
-						});
-					}
-
-					if (double) {
-						bull.lasers.push({
-							x: bull.x + LASER_SPD * a.x * 3,
-							y: bull.y - LASER_SPD * a.y * 3,
-							xv: LASER_SPD * a.x,
-							yv: -LASER_SPD * a.y,
-							life: bounce ? 150 : 25,
-						});
-					}
-				}
-			}
-
-			function enemyShot(enemy) {
-				if (enemy.reload == 0) {
-					enemy.reload == 50;
-					enemy.ammo++;
-				}
-				if (enemy.ammo > 0 && enemy.shotClock == 0) {
-					enemy.ammo--;
-					// create the bullet object
-					enemy.shotClock = 50;
-					enemy.lasers.push(50);
-					// get direction vector between enemy and self
-
-					let xdir = bull.x - enemy.x;
-					let ydir = bull.y - enemy.y;
-
-					let xunit = xdir % 10;
-					let yunit = ydir % 10;
-
-					enemyProjectiles.push({
-						x: enemy.x,
-						y: enemy.y,
-						xv: xunit,
-						yv: yunit,
-						life: 250,
-					});
-				} else if (enemy.shotClock > 0) {
-					enemy.shotClock--;
-				}
-			}
-
-			function calculateValue() {
-				value = parseInt(CURRENT_BITCOIN_VALUE.split(',').join('')) * SCORE;
-				if (value < 1e3) return value;
-				if (value >= 1e3 && value < 1e6) return +(value / 1e3).toFixed(1) + 'K';
-				if (value >= 1e6 && value < 1e9) return +(value / 1e6).toFixed(1) + 'M';
-				if (value >= 1e9 && value < 1e12) return +(value / 1e9).toFixed(1) + 'B';
-				if (value >= 1e12) return +(value / 1e12).toFixed(1) + 'T';
 			}
 
 			function update() {
-				valueString = calculateValue();
 				context.canvas.width = window.innerWidth - 25;
 				context.canvas.height = window.innerHeight - 25;
 				context.fillStyle = 'white';
 				context.fillRect(0, 0, canvas.width, canvas.height);
 
-				if (menu) {
-					context.fillStyle = 'white';
-					context.fillRect(100, 100, 100, 100);
-					context.fillStyle = 'black';
-					context.font = '20px san-serif';
-					context.fillText('Avoid the bears and collect BTC', 20, 245);
-					context.fillText('Move: Arrow Keys', 20, 275);
-					context.fillText('Shoot: W-A-S-D', 20, 300);
-					context.fillText('Charge: Spacebar', 20, 325);
-					context.fillText('Exit: Delete', 20, 375);
-					context.fillText('Want to contribute?  Submit a pull request to btfetf.github.io', 20, 400);
-				}
-
-				if (bull.shotClock > 0) {
-					bull.shotClock -= 1;
-				}
-				if (SCORE < 15 && bull.boost == 100) {
-					if (TIME % 75 == 0 && bull.hp < 3 && bull.ammo == 10) bull.hp++;
-					if (TIME % 75 == 0 && bull.ammo < 10) bull.ammo++;
-				}
-				if (SCORE > 15 && SCORE < 30 && bull.hp < 3 && bull.boost == 100 && TIME % 150 == 0) {
-					bull.hp++;
-				}
-				if (SCORE > 30 && bull.hp < 2 && bull.boost == 100 && TIME % 250 == 0) {
-					bull.hp++;
-				}
-				if (SCORE > 20 && !bounce) {
-					double = true;
-				}
-				if (SCORE > 30 && !bounce) {
-					fork = true;
-				}
-				if (TIME % 50 == 0) {
-					bearspeed += 0.1;
-				}
-
-				if (SCORE > 10 && !bounce) {
-					console.log(powerUp.position);
-
-					if (TIME % 15 == 0) {
-						let i = Math.floor(Math.random() * 4);
-						let j = Math.floor(Math.random() * 4);
-						TIME % 30 > 15 ? (powerUp.position.x += j) : (powerUp.position.x -= j);
-						TIME % 30 > 15 ? (powerUp.position.y -= i) : (powerUp.position.y += i);
-					}
-					context.drawImage(document.getElementById(powerPos), powerUp.position.x, powerUp.position.y);
-				}
-
 				function move(object, type) {
 					if (object.moveLeft) {
-						object.x = type == 'bear' ? object.x - bearspeed : object.x - 5;
+						object.x = type == 'sheep' ? object.x - sheepSpeed : object.x - 5;
 					}
 					if (object.moveRight) {
-						object.x = type == 'bear' ? object.x + bearspeed : object.x + 5;
+						object.x = type == 'sheep' ? object.x + sheepSpeed : object.x + 5;
 					}
 					if (object.moveUp) {
-						object.y = type == 'bear' ? object.y + bearspeed : object.y + 5;
+						object.y = type == 'sheep' ? object.y + sheepSpeed : object.y + 5;
 					}
 					if (object.moveDown) {
-						object.y = type == 'bear' ? object.y - bearspeed : object.y - 5;
+						object.y = type == 'sheep' ? object.y - sheepSpeed : object.y - 5;
 					}
 				}
+				if (!player.spin) {
+					move(player, 'player');
+				}
 
-				move(bull, 'bull');
-				if (bull.charge && bull.boost > 0) {
-					move(bull, 'bull');
-					move(bull, 'bull');
-					move(bull, 'bull');
-					bull.boost--;
-				} else if (TIME % 5 == 0 && bull.boost < 100) {
-					bull.boost++;
+				if (player.spin) {
+					if (TIME % 10 == 0) {
+						if (WOOL > 10) {
+							WOOL -= 10;
+							GOLD += 1;
+						}
+					}
 				}
 
 				// handle edge of screen
@@ -399,223 +289,112 @@
 					}
 				}
 
-				var bearimg = document.getElementById('bear');
-
-				for (bear in bears) {
+				for (sheep in flock) {
+					if (TIME % 10 == 0) {
+						flock[sheep].grow();
+					}
 					if (TIME % 25 == 0) {
 						let i = Math.floor(Math.random() * 4);
 						if (i == 1) {
-							bears[bear].moveDown = true;
-							bears[bear].moveLeft = false;
+							flock[sheep].moveDown = true;
+							flock[sheep].moveLeft = false;
 						} else if (i == 2) {
-							bears[bear].moveRight = true;
-							bears[bear].moveDown = false;
+							flock[sheep].moveRight = true;
+							flock[sheep].moveDown = false;
 						} else if (i == 3) {
-							bears[bear].moveUp = true;
-							bears[bear].moveRight = false;
+							flock[sheep].moveUp = true;
+							flock[sheep].moveRight = false;
 						} else if (i == 0) {
-							bears[bear].moveLeft = true;
-							bears[bear].moveUp = false;
+							flock[sheep].moveLeft = true;
+							flock[sheep].moveUp = false;
 						}
 					}
 
-					bears[bear].ammo += 1;
-					enemyShot(bears[bear]);
-					move(bears[bear], 'bear');
-					handleEdge(bears[bear]);
+					flock[sheep].ammo += 1;
+					move(flock[sheep], 'sheep');
+					handleEdge(flock[sheep]);
 
-					for (laser in bears[bear].lasers) {
-						//collision detection
-						if (
-							Math.sqrt(
-								(bull.x - bears[bear].lasers[laser].x) * (bull.x - bears[bear].lasers[laser].x) +
-									(bull.y - bears[bear].lasers[laser].y) * (bull.y - bears[bear].lasers[laser].y)
-							) < 75
-						) {
-							bull.hp--;
-							bears[bear].lasers.pop(laser);
-						}
+					//if player runs into sheep
+					if (
+						Math.sqrt(
+							(player.x - flock[sheep].x) * (player.x - flock[sheep].x) + (player.y - flock[sheep].y) * (player.y - flock[sheep].y)
+						) < 75
+					) {
+						player.hp--;
+						flock[sheep].sheer();
 					}
+					var sheepimg = document.getElementById('sheep');
+					var sheepNoWool = document.getElementById('sheepNoWool');
+					var sheepHalfWool = document.getElementById('sheepHalfWool');
+					let choice = sheepimg;
 
-					//if bull runs into bear
-					if (Math.sqrt((bull.x - bears[bear].x) * (bull.x - bears[bear].x) + (bull.y - bears[bear].y) * (bull.y - bears[bear].y)) < 75) {
-						bull.hp--;
-						bears.splice(bear, 1);
+					// Get image for sheep
+					if (flock[sheep].woolSize < 25) {
+						choice = sheepNoWool;
+					} else if (flock[sheep].woolSize < 75) {
+						choice = sheepHalfWool;
 					}
-					context.drawImage(bearimg, bears[bear].x, bears[bear].y, 100, 100);
+					context.fillStyle = 'black';
+					context.font = '30px san-serif';
+					context.drawImage(choice, flock[sheep].x, flock[sheep].y, 100, 100);
+					context.fillText('Sheep', flock[sheep].x + 10, flock[sheep].y + 125);
+					context.fillText('wool: ' + flock[sheep].woolSize, flock[sheep].x + 10, flock[sheep].y + 155);
 				}
 
-				handleEdge(bull);
+				handleEdge(player);
 
-				// if bull runs into coin
-				if (Math.sqrt((bull.x - coinPos.x) * (bull.x - coinPos.x) + (bull.y - coinPos.y) * (bull.y - coinPos.y)) < 75) {
-					SCORE++;
-					if (SCORE > HIGH_SCORE) {
-						HIGH_SCORE = SCORE;
-						HIGH_VALUE = value + parseInt(CURRENT_BITCOIN_VALUE.split(',').join(''));
-					}
-					if (SCORE % 10 == 0) {
-						bull.ammo++;
-					}
-					coinPos.x = Math.floor(Math.random() * (context.canvas.width - 25));
-					coinPos.y = Math.floor(Math.random() * (context.canvas.height - 25));
-					bears.push({
-						ammo: 0,
-						shotClock: 50,
-						recharge: 50,
-						lasers: [],
-						x: coinPos.x + 25,
-						y: coinPos.y + 25,
-						r: BULL_SIZE / 2,
-						moveUp: false,
-						moveDown: false,
-						moveLeft: true,
-						moveRight: false,
-					});
+				//if player runs into coin
+				if (Math.sqrt((player.x - egg.x) * (player.x - egg.x) + (player.y - egg.y) * (player.y - egg.y)) < 75) {
+					egg.x = Math.floor(Math.random() * (context.canvas.width - 25));
+					egg.y = Math.floor(Math.random() * (context.canvas.height - 25));
+					createSheep();
 				}
 				if (
 					Math.sqrt(
-						(bull.x - powerUp.position.x) * (bull.x - powerUp.position.x) + (bull.y - powerUp.position.y) * (bull.y - powerUp.position.y)
+						(player.x - powerUp.position.x) * (player.x - powerUp.position.x) +
+							(player.y - powerUp.position.y) * (player.y - powerUp.position.y)
 					) < 75 &&
-					SCORE > 10
+					GOLD > 10
 				) {
 					powerUp.effect();
 				}
-				function bounceCheck(laser) {
-					if (laser.y + laser.yv < 0 || laser.y + laser.yv > canvas.height) {
-						laser.yv = -laser.yv;
-					} else if (laser.x + laser.xv < 0 || laser.x + laser.xv > canvas.width) {
-						laser.xv = -laser.xv;
-					}
-				}
-
 				var ticker = document.getElementById('greenticker');
 				var projectile = document.getElementById('projectile');
-
-				//check if laser hit bears or wall if bouncy
-				for (var i = 0; i < bull.lasers.length; i++) {
-					bull.lasers[i].life--;
-					if (bounce) bounceCheck(bull.lasers[i]);
-					bull.lasers[i].x += bull.lasers[i].xv;
-					bull.lasers[i].y += bull.lasers[i].yv;
-					if (bull.lasers[i].life != 0) {
-						for (bear in bears) {
-							if (
-								Math.sqrt(
-									(bull.lasers[i].x - bears[bear].x) * (bull.lasers[i].x - bears[bear].x) +
-										(bull.lasers[i].y - bears[bear].y) * (bull.lasers[i].y - bears[bear].y)
-								) < 75
-							) {
-								bears.splice(bear, 1);
-								bull.lasers.splice(i, 1);
-							} else {
-								context.drawImage(ticker, bull.lasers[i].x, bull.lasers[i].y, 25, 25);
-							}
-						}
-					} else {
-						bull.lasers.splice(i, 1);
-					}
-				}
-
-				for (var i = 0; i < enemyProjectiles.length; i++) {
-					enemyProjectiles[i].life--;
-					enemyProjectiles[i].x += enemyProjectiles[i].xv;
-					enemyProjectiles[i].y += enemyProjectiles[i].yv;
-					if (enemyProjectiles[i].life != 0) {
-						for (bear in bears) {
-							if (
-								Math.sqrt(
-									(enemyProjectiles[i].x - bull.x) * (enemyProjectiles[i].x - bull.x) +
-										(enemyProjectiles[i].y - bull.y) * (enemyProjectiles[i].y - bull.y)
-								) < 75
-							) {
-								bull.hp--;
-								enemyProjectiles.splice(i, 1);
-							} else {
-								context.drawImage(projectile, enemyProjectiles[i].x, enemyProjectiles[i].y, 25, 25);
-							}
-						}
-					} else {
-						enemyProjectiles.splice(i, 1);
-					}
-				}
-
-				// If game over
-				if (bull.hp < 1) {
-					SCORE = 0;
-					bearspeed = 3;
-					double = false;
-					bounce = false;
-					fork = false;
-					bull.x = canvas.width / 2;
-					bull.y = canvas.height / 2;
-					bull.hp = 3;
-					bull.ammo = 10;
-					bull.boost = 100;
-					bears = [
-						{
-							x: coinPos.x - 25,
-							y: coinPos.y - 25,
-							r: BULL_SIZE / 2,
-							moveUp: false,
-							moveDown: false,
-							moveLeft: true,
-							moveRight: false,
-							ammo: 0,
-							lasers: [],
-						},
-					];
-					enemyProjectiles = [];
-				}
-
-				if (TIME % 4 == 0) {
-					if (choice == 'coinPos1') choice = 'coinPos2';
-					else if (choice == 'coinPos2') choice = 'coinPos3';
-					else if (choice == 'coinPos3') choice = 'coinPos4';
-					else if (choice == 'coinPos4') choice = 'coinPos5';
-					else if (choice == 'coinPos5') choice = 'coinPos6';
-					else if (choice == 'coinPos6') choice = 'coinPos7';
-					else if (choice == 'coinPos7') choice = 'coinPos8';
-					else if (choice == 'coinPos8') choice = 'coinPos9';
-					else if (choice == 'coinPos9') choice = 'coinPos1';
-				}
-
-				if (TIME % 6 == 0) {
-					if (powerPos == 'powerPos1') powerPos = 'powerPos2';
-					else if (powerPos == 'powerPos2') powerPos = 'powerPos3';
-					else if (powerPos == 'powerPos3') powerPos = 'powerPos4';
-					else if (powerPos == 'powerPos4') powerPos = 'powerPos5';
-					else if (powerPos == 'powerPos5') powerPos = 'powerPos6';
-					else if (powerPos == 'powerPos6') powerPos = 'powerPos7';
-					else if (powerPos == 'powerPos7') powerPos = 'powerPos8';
-					else if (powerPos == 'powerPos8') powerPos = 'powerPos9';
-					else if (powerPos == 'powerPos9') powerPos = 'powerPos1';
-				}
 
 				TIME++;
 				context.fillStyle = 'black';
 				context.font = '30px san-serif';
 
-				context.fillText('Bitcoin: ' + SCORE, 20, context.canvas.height / 5);
-				context.fillText('Current Value: $' + valueString, 20, context.canvas.height / 5 + 30);
+				context.fillText('Wool: ' + WOOL, 20, context.canvas.height / 5);
+				context.fillText('Sheep: ' + flock.length, 20, context.canvas.height / 5 + 75);
+				// context.fillText('Demand: ' + DEMAND, 20, context.canvas.height / 5 + 115);
 
-				context.fillText('Your High Score: ' + HIGH_SCORE, context.canvas.width - 250, 50);
-				context.fillText('$' + HIGH_VALUE, context.canvas.width - 250, 80);
+				context.fillText('Gold: ' + GOLD, 20, context.canvas.height / 5 + 145);
+
+				// context.fillText('Your High Score: ' + HIGH_SCORE, context.canvas.width - 250, 50);
+				// context.fillText('$' + HIGH_VALUE, context.canvas.width - 250, 80);
 				context.fillStyle = 'black';
 				context.font = '20px san-serif';
-				context.fillText('Press H for Help ', 20, 20);
-				context.fillText('HP: ' + bull.hp, 20, 55);
-				context.fillText('Ammo: ' + bull.ammo, 20, 80);
-				context.fillText('Charge: ' + bull.boost, 20, 105);
-				context.fillText('Leaderboard ', context.canvas.width / 2 - 60, context.canvas.height / 20);
-				context.fillText('$694.20T\nUser: musk71', context.canvas.width / 2 - 100, context.canvas.height / 20 + 25);
-				context.fillText('$4.24M\nUser: shep', context.canvas.width / 2 - 100, context.canvas.height / 20 + 50);
+				// context.fillText('Press H for Help ', 20, 20);
+				// context.fillText('HP: ' + player.hp, 20, 55);
+				// context.fillText('Ammo: ' + player.ammo, 20, 80);
+				// context.fillText('spin: ' + player.boost, 20, 105);
+				// context.fillText('Leaderboard ', context.canvas.width / 2 - 60, context.canvas.height / 20);
+				// context.fillText('$694.20T\nUser: musk71', context.canvas.width / 2 - 100, context.canvas.height / 20 + 25);
+				// context.fillText('$4.24M\nUser: shep', context.canvas.width / 2 - 100, context.canvas.height / 20 + 50);
 
 				var img = document.getElementById(choice);
-				var bullimg = !bull.charge > 0 || bull.boost == 0 ? document.getElementById('sheep') : document.getElementById('bullWithLazers');
+				var bullimg = !player.spin > 0 || player.boost == 0 ? document.getElementById('blacksheep') : document.getElementById('blacksheep');
 
-				context.drawImage(img, coinPos.x, coinPos.y);
-				context.drawImage(bullimg, bull.x, bull.y, !bull.charge || bull.boost == 0 ? 100 : 120, !bull.charge || bull.boost == 0 ? 100 : 120);
+				context.drawImage(img, egg.x, egg.y, 50, 50);
+				context.drawImage(
+					bullimg,
+					player.x,
+					player.y,
+					!player.spin || player.boost == 0 ? 100 : 120,
+					!player.spin || player.boost == 0 ? 100 : 120
+				);
+				player.spin ? context.drawImage(spindle, player.x + 100, player.y, 100, 100) : null;
 			}
 		</script>
 	</body>
